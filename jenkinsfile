@@ -1,0 +1,104 @@
+pipeline {
+    agent any
+    tools {
+        nodejs "nodejs"
+    }
+
+    environment {
+        DOCKER_HUB_TOKEN = credentials('docker-hub-key')
+        DOCKER_IMAGE_NAME = "houssemnasri/houssemnasri-4carctic-g1-frontend"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '7'))
+        disableResume()
+    }
+
+    stages {
+       stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/NasriHoussemEddine/frontend.git'
+            }
+        }
+
+        stage('Verify Node and NPM Versions') {
+            steps {
+                sh 'node -v'
+                sh 'npm -v'
+            }
+        }
+
+        stage('Check Latest Image Tag') {
+            steps {
+                script {
+                    def latestTag = sh(script: "docker images --format '{{.Tag}}' ${DOCKER_IMAGE_NAME} | sort -V | tail -n 1", returnStdout: true).trim()
+                    
+                    if (latestTag) {
+                        def versionParts = latestTag.tokenize('.')
+                        def major = versionParts[0].toInteger()
+                        def minor = versionParts[1].toInteger()
+                        
+                        if (minor < 9) {
+                            minor += 1
+                        } else {
+                            minor = 0
+                            major += 1
+                        }
+                        env.VERSION = "${major}.${minor}"
+                    } else {
+                        env.VERSION = "1.0"
+                    }
+                    
+                    echo "New version will be: ${env.VERSION}"
+                }
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm cache clean --force'
+                sh 'npm install --legacy-peer-deps'
+            }
+        }
+
+        stage('Build Angular App') {
+            steps {
+                sh 'npm run build --prod'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE_NAME}:${env.VERSION} ."
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    try {
+                        sh "echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin"
+                        sh "docker push ${DOCKER_IMAGE_NAME}:${env.VERSION}"
+                    } finally {
+                        sh 'docker logout'
+                    }
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh "docker rm -f my-angular-app || true"
+                    sh "docker run -d --name my-angular-app -p 80:80 ${DOCKER_IMAGE_NAME}:${env.VERSION}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
