@@ -21,7 +21,7 @@ RUN ls -la /app/dist
 FROM nginx:alpine AS production-stage
 
 # Copy the Angular build output to Nginx
-COPY --from=build-stage /app/dist/crudtuto-Front /usr/share/nginx/html
+COPY --from=build-stage /app/dist/crudtuto-front /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

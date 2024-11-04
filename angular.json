@@ -104,7 +104,7 @@
       }
     }
   },
-  "defaultProject": "crudtuto-Front",
+  "defaultProject": "crudtuto-front",
   "cli": {
     "analytics": "b67b3eaf-9a55-4ae0-9975-0239c1b3f481"
   }
