@@ -14,11 +14,14 @@ COPY . .
 # Build the Angular application
 RUN npm run build --prod
 
+# List the contents of the /app/dist directory
+RUN ls -la /app/dist
+
 # Stage 2: Serve the app with Nginx
 FROM nginx:alpine AS production-stage
 
 # Copy the Angular build output to Nginx
-COPY --from=build-stage /app/dist/crudtuto-front /usr/share/nginx/html
+COPY --from=build-stage /app/dist/crudtuto-Front /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
