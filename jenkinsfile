@@ -9,11 +9,6 @@ pipeline {
         DOCKER_IMAGE_NAME = "houssemnasri/houssemnasri-4carctic-g1-frontend"
     }
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '7'))
-        disableResume()
-    }
-
     stages {
        stage('Checkout') {
             steps {
