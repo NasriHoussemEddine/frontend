@@ -1,29 +1,28 @@
 # Stage 1: Build the Angular app
-FROM node:16 AS build-stage
+FROM node:16 AS build
 
-# Set working directory in the container
+# Set the working directory
 WORKDIR /app
 
+# Copy package.json and package-lock.json
+COPY package.json ./
+
 # Install dependencies
-COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copy the Angular project files
+# Copy the rest of the application code
 COPY . .
 
 # Build the Angular application
-RUN npm run build --prod
+RUN npm run build
 
-# List the contents of the /app/dist directory
-RUN ls -la /app/dist
-
-# Stage 2: Serve the app with Nginx
-FROM nginx:alpine AS production-stage
-
-# Copy the Angular build output to Nginx
-COPY --from=build-stage /app/dist/crudtuto-front /usr/share/nginx/html
-
-# Expose port 80
+# Stage 2: Serve the application using Nginx
+FROM nginx:alpine
+# Copy the built application from the previous stage
+COPY --from=build /app/dist/crudtuto-Front /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/
+# Expose port 3000
 EXPOSE 80
 
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
