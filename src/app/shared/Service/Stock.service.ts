@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 
 import { HttpClient} from '@angular/common/http';
 
+import { environment } from 'src/environments/environment.prod';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class StockService {
-  readonly API_URL = 'http://localhost:8089/SpringMVC/stock';
+  //readonly API_URL = 'http://localhost:8089/SpringMVC/stock';
+  readonly API_URL = `${environment.apiUrl}/stock`;
 
   constructor(private httpClient: HttpClient) { }
 
@@ -24,3 +27,5 @@ export class StockService {
     return  this.httpClient.delete(`${this.API_URL}/remove-stock/${idStock}`)
   }
 }
+
+

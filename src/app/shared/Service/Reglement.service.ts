@@ -1,12 +1,14 @@
 import {Injectable} from '@angular/core';
 
 import {HttpClient} from '@angular/common/http';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReglementService {
-  readonly API_URL = 'http://localhost:8089/SpringMVC/reglement';
+  //readonly API_URL = 'http://localhost:8089/SpringMVC/reglement';
+  readonly API_URL = `${environment.apiUrl}/reglement`;
 
   constructor(private httpClient: HttpClient) {
   }

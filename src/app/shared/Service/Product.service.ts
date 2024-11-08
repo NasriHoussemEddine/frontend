@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 
 import { HttpClient} from '@angular/common/http';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  readonly API_URL = 'http://localhost:8089/SpringMVC/produit';
-
+  //readonly API_URL = 'http://localhost:8089/SpringMVC/produit';
+  readonly API_URL = `${environment.apiUrl}/produit`;
+  
   constructor(private httpClient: HttpClient) { }
   getAllProducts() {
     return this.httpClient.get(`${this.API_URL}/retrieve-all-produits`)

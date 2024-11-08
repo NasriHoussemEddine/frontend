@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactureService {
-  readonly API_URL = 'http://localhost:8089/SpringMVC/facture';
+  //readonly API_URL = 'http://localhost:8089/SpringMVC/facture';
+  readonly API_URL = `${environment.apiUrl}/facture`;
 
   constructor(private httpClient: HttpClient) { }
 

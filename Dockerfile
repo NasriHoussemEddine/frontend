@@ -1,28 +1,33 @@
-# Stage 1: Build the Angular app
+# Étape de construction
 FROM node:16 AS build
 
-# Set the working directory
+# Répertoire de travail
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json ./
+# Copier les fichiers de configuration
+COPY package*.json ./
 
-# Install dependencies
+# Installer les dépendances
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application code
+# Copier le reste de l'application
 COPY . .
 
-# Build the Angular application
-RUN npm run build
+# Construire l'application
+#RUN  npm run build --prod
+RUN npm run build -- --output-path=dist
 
-# Stage 2: Serve the application using Nginx
+# Étape de production
 FROM nginx:alpine
-# Copy the built application from the previous stage
-COPY --from=build /app/dist/crudtuto-Front /usr/share/nginx/html
-COPY default.conf /etc/nginx/conf.d/
-# Expose port 3000
+
+# Copier la configuration Nginx personnalisée
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copier les fichiers construits vers Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Exposer le port
 EXPOSE 80
 
-# Start Nginx
+# Commande par défaut pour démarrer Nginx
 CMD ["nginx", "-g", "daemon off;"]
