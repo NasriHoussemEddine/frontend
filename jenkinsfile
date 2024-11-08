@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-       stage('Checkout') {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/NasriHoussemEddine/frontend.git'
             }
@@ -23,32 +23,25 @@ pipeline {
             }
         }
 
-        stage('Check Latest Image Tag') {
+        stage('Get Commit Message and Set Version') {
             steps {
                 script {
-                    def latestTag = sh(script: "docker images --format '{{.Tag}}' ${DOCKER_IMAGE_NAME} | sort -V | tail -n 1", returnStdout: true).trim()
-                    
-                    if (latestTag) {
-                        def versionParts = latestTag.tokenize('.')
-                        def major = versionParts[0].toInteger()
-                        def minor = versionParts[1].toInteger()
-                        
-                        if (minor < 9) {
-                            minor += 1
-                        } else {
-                            minor = 0
-                            major += 1
-                        }
-                        env.VERSION = "${major}.${minor}"
+                    // Get the latest commit message
+                    def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    // Try to extract a version pattern from the commit message (e.g., v1.2.3)
+                    def versionMatch = commitMessage =~ /v\d+\.\d+\.\d+/
+                    if (versionMatch) {
+                        env.VERSION = versionMatch[0]  // Set the version to the matched version
                     } else {
-                        env.VERSION = "1.0"
+                        // If no version is found in the commit message, default to "1.0"
+                        error("No valid version found in commit message")
                     }
-                    
+
                     echo "New version will be: ${env.VERSION}"
                 }
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm cache clean --force'
@@ -83,19 +76,11 @@ pipeline {
 
         stage('Deploy front App') {
             steps {
-                echo "Deploying Backend Application..."
+                echo "Deploying Frontend Application..."
                 sh 'minikube kubectl -- apply -f angular.yaml'
             }
         }
 
-        // stage('Run Docker Container') {
-        //     steps {
-        //         script {
-        //             sh "docker rm -f my-angular-app || true"
-        //             sh "docker run -d --name my-angular-app -p 80:80 ${DOCKER_IMAGE_NAME}:${env.VERSION}"
-        //         }
-        //     }
-        // }
     }
 
     post {
