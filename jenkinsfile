@@ -74,12 +74,12 @@ pipeline {
             }
         }
 
-        stage('Deploy front App') {
-            steps {
-                echo "Deploying Frontend Application..."
-                sh 'minikube kubectl -- apply -f angular.yaml'
-            }
-        }
+       // stage('Deploy front App') {
+           // steps {
+               // echo "Deploying Frontend Application..."
+               // sh 'minikube kubectl -- apply -f angular.yaml'
+           // }
+        //}
 
     }
 
